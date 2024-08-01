@@ -1,9 +1,11 @@
+// src/app/(components)/Navbar/index.tsx
 "use client";
 
 import { useAppSelector, useAppDispatch } from "@/app/redux";
 import { setIsDarkMode, setIsSidebarCollapsed } from "@/app/state";
 import { Bell, Menu, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import React from "react";
 
 const Navbar = () => {
@@ -20,6 +22,7 @@ const Navbar = () => {
   const toggleDarkMode = () => {
     dispatch(setIsDarkMode(!isDarkMode));
   };
+
   return (
     <div className="flex justify-between items-center w-full mb-7">
       {/* left side */}
@@ -61,10 +64,12 @@ const Navbar = () => {
             </span>
           </div>
           <hr className="w-0 h-7 border-solid border-l border-gray-300 mx-3" />
-          <div className="flex items-center gap-3 cursor-pointer">
-            <div className="w-9 h-9">image</div>
-            <span className="font-semibold">Maheen Khan</span>
-          </div>
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </div>
         <Link href="/settings">
           <Settings className="cursor-pointer text-gray-500" size={24} />

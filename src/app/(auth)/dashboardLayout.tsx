@@ -1,10 +1,10 @@
+// src/app/(auth)/dashboardLayout.tsx
 "use client";
 
 import React, { useEffect } from "react";
 import Navbar from "@/app/(components)/Navbar";
 import Sidebar from "@/app/(components)/Sidebar";
-import StoreProvider, { useAppSelector } from "./redux";
-// the parentheses stops nextjs from registering components as a route/separate page
+import StoreProvider, { useAppSelector } from "../redux";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const isSidebarCollapsed = useAppSelector(
@@ -18,7 +18,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     } else {
       document.documentElement.classList.add("light");
     }
-  });
+  }, [isDarkMode]);
 
   return (
     <div

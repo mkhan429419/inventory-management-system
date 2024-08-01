@@ -1,7 +1,10 @@
-import type { Metadata } from "next";
+// src/app/layout.tsx
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import DashboardWrapper from "./dashboardWrapper";
+import type { Metadata } from "next";
+import DashboardWrapper from "./(auth)/dashboardLayout";
+import PublicLayout from "./(auth)/publicLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,10 +19,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <DashboardWrapper>{children}</DashboardWrapper>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={inter.className}>
+          <SignedIn>
+            <DashboardWrapper>{children}</DashboardWrapper>
+          </SignedIn>
+          <SignedOut>
+            <PublicLayout>{children}</PublicLayout>
+          </SignedOut>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
