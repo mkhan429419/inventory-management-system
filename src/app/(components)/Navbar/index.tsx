@@ -6,8 +6,7 @@ import { setIsDarkMode, setIsSidebarCollapsed } from "@/app/state";
 import { Bell, Menu, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React from "react";
 
 const Navbar = () => {
   const dispatch = useAppDispatch();
@@ -15,7 +14,6 @@ const Navbar = () => {
     (state) => state.global.isSidebarCollaspsed
   );
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-  const router = useRouter();
 
   const toggleSidebar = () => {
     dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
@@ -24,14 +22,6 @@ const Navbar = () => {
   const toggleDarkMode = () => {
     dispatch(setIsDarkMode(!isDarkMode));
   };
-
-  // Redirect to sign-in page if signed out
-  useEffect(() => {
-    const signedOutElement = document.querySelector("[data-clerk-signed-out]");
-    if (signedOutElement) {
-      router.push("/sign-in");
-    }
-  }, [router]);
 
   return (
     <div className="flex justify-between items-center w-full mb-7">
