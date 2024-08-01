@@ -5,7 +5,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import DashboardWrapper from "./(auth)/dashboardLayout";
 import PublicLayout from "./(auth)/publicLayout";
-import { dark } from "@clerk/themes"
+import { dark } from "@clerk/themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,9 +20,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider appearance={{
-      baseTheme: dark
-    }}>
+    <ClerkProvider
+      appearance={{
+        baseTheme: dark,
+        variables: {
+          colorPrimary: "#3371FF",
+          fontSize: "16px",
+        },
+      }}
+    >
       <html lang="en">
         <body className={inter.className}>
           <SignedIn>
