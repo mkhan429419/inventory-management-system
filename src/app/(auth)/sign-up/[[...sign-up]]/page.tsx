@@ -1,5 +1,9 @@
+// src/app/(auth)/sign-in/page.tsx
 import { SignUp } from "@clerk/nextjs";
+import React from "react";
 
-export default function Page() {
+const SignUpPage = () => {
   return <SignUp />;
-}
+};
+
+export default SignUpPage;
