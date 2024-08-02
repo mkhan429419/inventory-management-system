@@ -1,7 +1,8 @@
 // src/app/api/dashboard/metrics/route.ts
 import { NextResponse } from "next/server";
 import { db } from "../../../../config/firebaseConfig";
-import { collection, getDocs, orderBy, limit, query, Timestamp } from "firebase/firestore";
+import { collection, getDocs, orderBy, limit, query, where, Timestamp } from "firebase/firestore";
+import { auth } from "@clerk/nextjs/server";
 
 interface PantryItem {
   id: string;
@@ -30,8 +31,16 @@ interface ExpenseByCategory {
   date: Timestamp;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { userId } = auth();
+
+    if (!userId) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log("Clerk User ID:", userId);
+
     const metrics = {
       popularPantryItems: [] as PantryItem[],
       salesSummary: [] as Summary[],
@@ -43,6 +52,7 @@ export async function GET() {
     // Real-time listener for popular pantry items
     const pantryItemsQuery = query(
       collection(db, "pantryItems"),
+      where("userId", "==", userId),
       orderBy("quantity", "desc"),
       limit(15)
     );
@@ -55,6 +65,7 @@ export async function GET() {
     // Real-time listener for sales summary
     const salesSummaryQuery = query(
       collection(db, "salesSummary"),
+      where("userId", "==", userId),
       orderBy("date", "desc"),
       limit(5)
     );
@@ -67,6 +78,7 @@ export async function GET() {
     // Real-time listener for purchase summary
     const purchaseSummaryQuery = query(
       collection(db, "purchaseSummary"),
+      where("userId", "==", userId),
       orderBy("date", "desc"),
       limit(5)
     );
@@ -79,6 +91,7 @@ export async function GET() {
     // Real-time listener for expense summary
     const expenseSummaryQuery = query(
       collection(db, "expenseSummary"),
+      where("userId", "==", userId),
       orderBy("date", "desc"),
       limit(5)
     );
@@ -91,6 +104,7 @@ export async function GET() {
     // Real-time listener for expense by category summary
     const expenseByCategorySummaryQuery = query(
       collection(db, "expenseByCategory"),
+      where("userId", "==", userId),
       orderBy("date", "desc"),
       limit(5)
     );

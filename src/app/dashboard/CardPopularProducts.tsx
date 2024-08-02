@@ -1,4 +1,3 @@
-// src/app/dashboard/CardPopularProducts.tsx
 import React, { useEffect, useState } from "react";
 import { db } from "@/config/firebaseConfig";
 import {
@@ -7,10 +6,11 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  where,
 } from "firebase/firestore";
+import { useUser } from "@clerk/nextjs";
 import { ShoppingBag } from "lucide-react";
 import Rating from "../(components)/Rating";
-
 interface PantryItem {
   id: string;
   name: string;
@@ -23,25 +23,29 @@ interface PantryItem {
 const CardPopularProducts = () => {
   const [popularProducts, setPopularProducts] = useState<PantryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useUser();
 
   useEffect(() => {
-    const q = query(
-      collection(db, "pantryItems"),
-      orderBy("quantity", "desc"),
-      limit(15)
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as PantryItem[];
-      setPopularProducts(items);
-      setIsLoading(false);
-    });
-
-    // Clean up the listener on component unmount
-    return () => unsubscribe();
-  }, []);
+    if (user) {
+      const q = query(
+        collection(db, "pantryItems"),
+        where("userId", "==", user.id),
+        orderBy("quantity", "desc"),
+        limit(15)
+      );
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as PantryItem[];
+        setPopularProducts(items);
+        setIsLoading(false);
+      });
+      console.log(user.id)
+      // Clean up the listener on component unmount
+      return () => unsubscribe();
+    }
+  }, [user]);
 
   return (
     <div className="row-span-3 xl:row-span-6 bg-white shadow-md rounded-2xl pb-16">
