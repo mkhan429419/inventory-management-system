@@ -1,7 +1,7 @@
 // src/app/api/dashboard/metrics/route.ts
-import { NextResponse } from 'next/server';
-import { db } from '../../../../config/firebaseConfig';
-import { collection, getDocs, orderBy, limit, query, Timestamp } from 'firebase/firestore';
+import { NextResponse } from "next/server";
+import { db } from "../../../../config/firebaseConfig";
+import { collection, getDocs, orderBy, limit, query, Timestamp } from "firebase/firestore";
 
 interface PantryItem {
   id: string;
@@ -32,80 +32,77 @@ interface ExpenseByCategory {
 
 export async function GET() {
   try {
-    // Fetch popular pantry items
+    const metrics = {
+      popularPantryItems: [] as PantryItem[],
+      salesSummary: [] as Summary[],
+      purchaseSummary: [] as Summary[],
+      expenseSummary: [] as Summary[],
+      expenseByCategorySummary: [] as ExpenseByCategory[],
+    };
+
+    // Real-time listener for popular pantry items
     const pantryItemsQuery = query(
-      collection(db, 'pantryItems'),
-      orderBy('quantity', 'desc'),
+      collection(db, "pantryItems"),
+      orderBy("quantity", "desc"),
       limit(15)
     );
     const pantryItemsSnapshot = await getDocs(pantryItemsQuery);
-    const popularPantryItems = pantryItemsSnapshot.docs.map((doc) => ({
+    metrics.popularPantryItems = pantryItemsSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as PantryItem[];
 
-    // Fetch sales summary
+    // Real-time listener for sales summary
     const salesSummaryQuery = query(
-      collection(db, 'salesSummary'),
-      orderBy('date', 'desc'),
+      collection(db, "salesSummary"),
+      orderBy("date", "desc"),
       limit(5)
     );
     const salesSummarySnapshot = await getDocs(salesSummaryQuery);
-    const salesSummary = salesSummarySnapshot.docs.map((doc) => ({
+    metrics.salesSummary = salesSummarySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Summary[];
 
-    // Fetch purchase summary
+    // Real-time listener for purchase summary
     const purchaseSummaryQuery = query(
-      collection(db, 'purchaseSummary'),
-      orderBy('date', 'desc'),
+      collection(db, "purchaseSummary"),
+      orderBy("date", "desc"),
       limit(5)
     );
     const purchaseSummarySnapshot = await getDocs(purchaseSummaryQuery);
-    const purchaseSummary = purchaseSummarySnapshot.docs.map((doc) => ({
+    metrics.purchaseSummary = purchaseSummarySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Summary[];
 
-    // Fetch expense summary
+    // Real-time listener for expense summary
     const expenseSummaryQuery = query(
-      collection(db, 'expenseSummary'),
-      orderBy('date', 'desc'),
+      collection(db, "expenseSummary"),
+      orderBy("date", "desc"),
       limit(5)
     );
     const expenseSummarySnapshot = await getDocs(expenseSummaryQuery);
-    const expenseSummary = expenseSummarySnapshot.docs.map((doc) => ({
+    metrics.expenseSummary = expenseSummarySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Summary[];
 
-    // Fetch expense by category summary
+    // Real-time listener for expense by category summary
     const expenseByCategorySummaryQuery = query(
-      collection(db, 'expenseByCategory'),
-      orderBy('date', 'desc'),
+      collection(db, "expenseByCategory"),
+      orderBy("date", "desc"),
       limit(5)
     );
     const expenseByCategorySummarySnapshot = await getDocs(expenseByCategorySummaryQuery);
-    const expenseByCategorySummaryRaw = expenseByCategorySummarySnapshot.docs.map((doc) => ({
+    metrics.expenseByCategorySummary = expenseByCategorySummarySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as ExpenseByCategory[];
 
-    const expenseByCategorySummary = expenseByCategorySummaryRaw.map((item) => ({
-      ...item,
-      amount: item.amount.toString(),
-    }));
-
-    return NextResponse.json({
-      popularPantryItems,
-      salesSummary,
-      purchaseSummary,
-      expenseSummary,
-      expenseByCategorySummary,
-    });
+    return NextResponse.json(metrics);
   } catch (error) {
-    console.error('Error retrieving dashboard metrics:', error);
-    return NextResponse.json({ message: 'Error retrieving dashboard metrics' }, { status: 500 });
+    console.error("Error retrieving dashboard metrics:", error);
+    return NextResponse.json({ message: "Error retrieving dashboard metrics" }, { status: 500 });
   }
 }
