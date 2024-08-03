@@ -10,7 +10,7 @@ import {
 import CardExpenseSummary from "./CardExpenseSummary";
 import CardPopularProducts from "./CardPopularProducts";
 import CardPurchaseSummary from "./CardPurchaseSummary";
-import CardSalesSummary from "./CardSalesSummary";
+import CardRecipesSummary from "./CardRecipesSummary";
 import StatCardPurchases from "./StatCardPurchases";
 import StatCardExpenses from "./StatCardExpenses";
 import StatCardRecipes from "./StatCardRecipes";
@@ -19,7 +19,7 @@ const Dashboard = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xl:overflow-auto gap-10 pb-4 custom-grid-rows">
       <CardPopularProducts />
-      <CardSalesSummary />
+      <CardRecipesSummary />
       <CardPurchaseSummary />
       <CardExpenseSummary />
       <StatCardPurchases

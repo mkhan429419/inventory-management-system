@@ -8,6 +8,7 @@ import {
   limit,
   onSnapshot,
   where,
+  Timestamp,
 } from "firebase/firestore";
 import { TrendingUp } from "lucide-react";
 import {
@@ -20,15 +21,17 @@ import {
   YAxis,
 } from "recharts";
 
-interface Summary {
+interface Recipe {
   id: string;
-  totalValue: number;
-  changePercentage?: number;
-  date: string; // Adjusted for recharts compatibility
+  userId: string;
+  title: string;
+  ingredients: string[];
+  instructions: string;
+  createdAt: string; // Adjusted for recharts compatibility
 }
 
-const CardSalesSummary = () => {
-  const [salesData, setSalesData] = useState<Summary[]>([]);
+const CardRecipesSummary = () => {
+  const [recipeData, setRecipeData] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useUser();
   const [timeframe, setTimeframe] = useState("weekly");
@@ -36,19 +39,25 @@ const CardSalesSummary = () => {
   useEffect(() => {
     if (user) {
       const q = query(
-        collection(db, "salesSummary"),
+        collection(db, "recipes"),
         where("userId", "==", user.id),
-        orderBy("date", "desc"),
+        orderBy("createdAt", "desc"),
         limit(5)
       );
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          date: (doc.data().date as any).toDate().toISOString().split("T")[0], // Convert timestamp to string
-        })) as Summary[];
-        setSalesData(data);
+        const data = snapshot.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            userId: docData.userId,
+            title: docData.title,
+            ingredients: docData.ingredients,
+            instructions: docData.instructions,
+            createdAt: (docData.createdAt as Timestamp).toDate().toISOString().split("T")[0], // Convert timestamp to string
+          };
+        }) as Recipe[];
+        setRecipeData(data);
         setIsLoading(false);
       });
 
@@ -59,25 +68,7 @@ const CardSalesSummary = () => {
     }
   }, [user]);
 
-  const totalValueSum =
-    salesData.reduce((acc, curr) => acc + curr.totalValue, 0) || 0;
-
-  const averageChangePercentage =
-    salesData.reduce((acc, curr, _, array) => {
-      return acc + (curr.changePercentage ?? 0) / array.length;
-    }, 0) || 0;
-
-  const highestValueData = salesData.reduce((acc, curr) => {
-    return acc.totalValue > curr.totalValue ? acc : curr;
-  }, salesData[0] || ({} as Summary));
-
-  const highestValueDate = highestValueData.date
-    ? new Date(highestValueData.date).toLocaleDateString("en-US", {
-        month: "numeric",
-        day: "numeric",
-        year: "2-digit",
-      })
-    : "N/A";
+  const totalRecipes = recipeData.length;
 
   return (
     <div className="row-span-3 xl:row-span-6 bg-white shadow-md rounded-2xl flex flex-col justify-between">
@@ -87,9 +78,7 @@ const CardSalesSummary = () => {
         <>
           {/* HEADER */}
           <div>
-            <h2 className="text-lg font-semibold mb-2 px-7 pt-5">
-              Sales Summary
-            </h2>
+            <h2 className="text-lg font-semibold mb-2 px-7 pt-5">Recipes Summary</h2>
             <hr />
           </div>
 
@@ -98,18 +87,8 @@ const CardSalesSummary = () => {
             {/* BODY HEADER */}
             <div className="flex justify-between items-center mb-6 px-7 mt-5">
               <div className="text-lg font-medium">
-                <p className="text-xs text-gray-400">Value</p>
-                <span className="text-2xl font-extrabold">
-                  $
-                  {(totalValueSum / 1000000).toLocaleString("en", {
-                    maximumFractionDigits: 2,
-                  })}
-                  m
-                </span>
-                <span className="text-green-500 text-sm ml-2">
-                  <TrendingUp className="inline w-4 h-4 mr-1" />
-                  {averageChangePercentage.toFixed(2)}%
-                </span>
+                <p className="text-xs text-gray-400">Total Recipes</p>
+                <span className="text-2xl font-extrabold">{totalRecipes}</span>
               </div>
               <select
                 className="shadow-sm border border-gray-300 bg-white p-2 rounded"
@@ -126,29 +105,25 @@ const CardSalesSummary = () => {
             {/* CHART */}
             <ResponsiveContainer width="100%" height={350} className="px-7">
               <BarChart
-                data={salesData}
+                data={recipeData}
                 margin={{ top: 0, right: 0, left: -25, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="" vertical={false} />
                 <XAxis
-                  dataKey="date"
+                  dataKey="createdAt"
                   tickFormatter={(value) => {
                     const date = new Date(value);
                     return `${date.getMonth() + 1}/${date.getDate()}`;
                   }}
                 />
                 <YAxis
-                  tickFormatter={(value) => {
-                    return `$${(value / 1000000).toFixed(0)}m`;
-                  }}
+                  tickFormatter={(value) => value}
                   tick={{ fontSize: 12, dx: -1 }}
                   tickLine={false}
                   axisLine={false}
                 />
                 <Tooltip
-                  formatter={(value: number) => [
-                    `$${value.toLocaleString("en")}`,
-                  ]}
+                  formatter={(value: number) => [`${value}`]}
                   labelFormatter={(label) => {
                     const date = new Date(label);
                     return date.toLocaleDateString("en-US", {
@@ -159,7 +134,7 @@ const CardSalesSummary = () => {
                   }}
                 />
                 <Bar
-                  dataKey="totalValue"
+                  dataKey="title"
                   fill="#3182ce"
                   barSize={10}
                   radius={[10, 10, 0, 0]}
@@ -172,11 +147,7 @@ const CardSalesSummary = () => {
           <div>
             <hr />
             <div className="mt-1 flex justify-between items-center px-7 mb-4">
-              <p>{salesData.length || 0} days</p>
-              <p className="text-sm">
-                Highest Sales Date:{" "}
-                <span className="font-bold">{highestValueDate}</span>
-              </p>
+              <p>{recipeData.length || 0} recipes</p>
             </div>
           </div>
         </>
@@ -185,4 +156,4 @@ const CardSalesSummary = () => {
   );
 };
 
-export default CardSalesSummary;
+export default CardRecipesSummary;
