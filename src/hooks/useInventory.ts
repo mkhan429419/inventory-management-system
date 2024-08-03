@@ -1,15 +1,19 @@
-// src/hooks/usePantryItems.ts
 import { useEffect, useState } from "react";
 import { db } from "@/config/firebaseConfig";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useUser } from "@clerk/nextjs";
 import { PantryItem } from "@/types";
+import { GridRowId } from "@mui/x-data-grid";
+import { useUpdatePantryItemMutation, useDeletePantryItemMutation } from "@/app/state/api";
 
-export const usePantryItems = () => {
+export const useInventory = () => {
   const { user, isLoaded } = useUser();
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<GridRowId[]>([]);
+  const [updatePantryItem] = useUpdatePantryItemMutation();
+  const [deletePantryItem] = useDeletePantryItemMutation();
 
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -37,5 +41,28 @@ export const usePantryItems = () => {
     return () => unsubscribe();
   }, [isLoaded, user]);
 
-  return { pantryItems, isLoading, isError };
+  const handleDelete = async () => {
+    for (const id of selectedItems) {
+      await deletePantryItem(id as string);
+    }
+    setSelectedItems([]);
+  };
+
+  const processRowUpdate = async (newRow: any) => {
+    const updatedRow = { ...newRow, isNew: false };
+    await updatePantryItem(updatedRow);
+    return updatedRow;
+  };
+
+  return {
+    user,
+    isLoaded,
+    pantryItems,
+    isLoading,
+    isError,
+    selectedItems,
+    setSelectedItems,
+    handleDelete,
+    processRowUpdate,
+  };
 };

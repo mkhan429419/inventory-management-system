@@ -9,7 +9,22 @@ export const api = createApi({
       query: () => "api/inventory",
       providesTags: ["PantryItems"],
     }),
+    updatePantryItem: builder.mutation({
+      query: ({ id, ...patch }) => ({
+        url: `api/inventory/${id}`,
+        method: 'PATCH',
+        body: patch,
+      }),
+      invalidatesTags: ["PantryItems"],
+    }),
+    deletePantryItem: builder.mutation({
+      query: (id) => ({
+        url: `api/inventory/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["PantryItems"],
+    }),
   }),
 });
 
-export const { useGetPantryItemsQuery } = api;
+export const { useGetPantryItemsQuery, useUpdatePantryItemMutation, useDeletePantryItemMutation } = api;
