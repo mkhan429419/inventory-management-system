@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["PantryItems", "Recipes"],
+  tagTypes: ["PantryItems", "Products", "Recipes"],
   endpoints: (builder) => ({
     // Pantry Items Endpoints
     getPantryItems: builder.query({
@@ -33,18 +33,67 @@ export const api = createApi({
       }),
       invalidatesTags: ["PantryItems"],
     }),
+    // Product Endpoints
+    getProducts: builder.query({
+      query: () => `api/products`,
+      providesTags: ["Products"],
+    }),
+    createProduct: builder.mutation({
+      query: (newProduct) => ({
+        url: `api/products`,
+        method: "POST",
+        body: newProduct,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    updateProduct: builder.mutation({
+      query: ({ id, ...patch }) => ({
+        url: `api/products/${id}`,
+        method: "PATCH",
+        body: patch,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    deleteProduct: builder.mutation({
+      query: (id) => ({
+        url: `api/products/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Products"],
+    }),
     // Recipe Endpoints
     getRecipes: builder.query({
       query: () => `api/recipes`,
       providesTags: ["Recipes"],
     }),
+    createRecipe: builder.mutation({
+      query: (newRecipe) => ({
+        url: `api/recipes`,
+        method: "POST",
+        body: newRecipe,
+      }),
+      invalidatesTags: ["Recipes"],
+    }),
+    deleteRecipe: builder.mutation({
+      query: (id) => ({
+        url: `api/recipes/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Recipes"],
+    }),
   }),
 });
 
-export const { 
-  useGetPantryItemsQuery, 
-  useCreatePantryItemMutation, 
-  useUpdatePantryItemMutation, 
+export const {
+  useGetPantryItemsQuery,
+  useCreatePantryItemMutation,
+  useUpdatePantryItemMutation,
   useDeletePantryItemMutation,
-  useGetRecipesQuery 
+  useGetProductsQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  useGetRecipesQuery,
+  useCreateRecipeMutation,
+  useDeleteRecipeMutation,
 } = api;

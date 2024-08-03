@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
               {
                 text: `Generate a recipe using the following ingredients: ${ingredients.join(
                   ", "
-                )}. Make sure the recipe utilizes ONLY the provided ingredients.`,
+                )}. Make sure the recipe utilizes ONLY the provided ingredients. Also, provide a recipe title for me.`,
               },
             ],
           },
@@ -38,11 +38,16 @@ export async function POST(req: NextRequest) {
       }
     );
 
+    console.log("Gemini API Response:", response.data);
+
     const suggestedRecipes = response.data;
-    console.log("Suggested Recipes:", suggestedRecipes);
+    const instructions = suggestedRecipes.candidates[0]?.content.parts[0].text;
+
+    // Extract title from the instructions and remove "##"
+    let title = instructions.split('\n')[0].replace('##', '').trim();
 
     // Return the suggested recipes
-    return new NextResponse(JSON.stringify(suggestedRecipes), {
+    return new NextResponse(JSON.stringify({ title, instructions }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

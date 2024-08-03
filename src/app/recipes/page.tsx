@@ -1,3 +1,4 @@
+// src/app/recipes/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -5,11 +6,17 @@ import Header from "@/app/(components)/Header";
 import { DataGrid, GridColDef, GridRowId } from "@mui/x-data-grid";
 import { useRecipes } from "@/hooks/useRecipes";
 import { Recipe } from "@/types";
-import axios from 'axios';
+import axios from "axios";
+import CreateRecipeModal from "./CreateRecipeModal";
+import ViewRecipeModal from "./ViewRecipeModal";
+import { PlusCircleIcon, Trash2 } from "lucide-react";
 
 const Recipes = () => {
-  const { recipes, isLoading, isError } = useRecipes();
+  const { recipes, isLoading, isError, deleteRecipe } = useRecipes();
   const [selectedRecipes, setSelectedRecipes] = useState<GridRowId[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 90 },
@@ -33,26 +40,66 @@ const Recipes = () => {
       field: "instructions",
       headerName: "Instructions",
       width: 300,
+      renderCell: (params) => (
+        <div>
+          {params.row.instructions.length > 100
+            ? `${params.row.instructions.substring(0, 100)}...`
+            : params.row.instructions}
+        </div>
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 150,
+      renderCell: (params) => (
+        <button
+          onClick={() => {
+            setSelectedRecipe(params.row);
+            setViewModalOpen(true);
+          }}
+          className="text-blue-500"
+        >
+          Read More
+        </button>
+      ),
     },
   ];
 
-  const generateRecipe = async () => {
-    const selectedRecipeDetails = selectedRecipes.map((id) => {
-      return recipes.find((recipe) => recipe.id === id);
-    });
-
-    const ingredients = selectedRecipeDetails.flatMap((recipe) => recipe?.ingredients || []);
-
-    console.log('Selected ingredients:', ingredients);
+  const generateRecipe = async (ingredients: string[]) => {
+    console.log("Selected ingredients:", ingredients);
 
     try {
-      const response = await axios.post('/api/recipes/suggestions', {
+      const response = await axios.post("/api/recipes/suggestions", {
         ingredients,
       });
-      console.log('Generated Recipe:', response.data);
+
+      console.log("API Response:", response.data);
+
+      const instructions = response.data.instructions;
+      const title = response.data.title || "Untitled Recipe";
+      console.log("Generated Recipe Title:", title);
+      console.log("Generated Recipe Instructions:", instructions);
+
+      // Now create the recipe in your database
+      await axios.post("/api/recipes", {
+        title,
+        ingredients,
+        instructions,
+      });
     } catch (error) {
-      console.error('Error generating recipe:', (error as any).response?.data || (error as any).message);
+      console.error(
+        "Error generating recipe:",
+        (error as any).response?.data || (error as any).message
+      );
     }
+  };
+
+  const handleDelete = async () => {
+    for (const id of selectedRecipes) {
+      await deleteRecipe(id as string);
+    }
+    setSelectedRecipes([]);
   };
 
   if (isLoading) {
@@ -69,7 +116,16 @@ const Recipes = () => {
 
   return (
     <div className="flex flex-col">
-      <Header name="Recipes" />
+      <div className="flex justify-between items-center">
+        <Header name="Recipes" />
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          <PlusCircleIcon className="w-5 h-5 mr-2 !text-gray-200" />
+          Create Recipe
+        </button>
+      </div>
       <DataGrid
         rows={recipes}
         columns={columns}
@@ -82,12 +138,23 @@ const Recipes = () => {
       />
       {selectedRecipes.length > 0 && (
         <button
-          onClick={generateRecipe}
-          className="self-center bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded mt-4 transition duration-200 flex items-center shadow"
+          onClick={handleDelete}
+          className="self-center bg-red-500 hover:bg-red-700 text-white font-bold px-4 py-2 rounded mt-4 transition duration-200 flex items-center shadow"
         >
-          Generate Recipe
+          <Trash2 className="w-4 h-4 mr-1" />
+          Delete Selected
         </button>
       )}
+      <CreateRecipeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreate={generateRecipe}
+      />
+      <ViewRecipeModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        recipe={selectedRecipe}
+      />
     </div>
   );
 };

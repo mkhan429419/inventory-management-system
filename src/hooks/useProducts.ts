@@ -3,7 +3,7 @@ import { db } from "@/config/firebaseConfig";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useUser } from "@clerk/nextjs";
 import { PantryItem } from "@/types";
-import { useCreatePantryItemMutation } from "@/app/state/api";
+import { useCreateProductMutation } from "@/app/state/api";
 
 export const useProducts = () => {
   const { user, isLoaded } = useUser();
@@ -12,7 +12,7 @@ export const useProducts = () => {
   const [filteredProducts, setFilteredProducts] = useState<PantryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [createProduct] = useCreatePantryItemMutation();
+  const [createProduct] = useCreateProductMutation();
 
   useEffect(() => {
     if (!isLoaded || !user) return;

@@ -15,10 +15,9 @@ export interface PantryItem {
 // src/types.ts
 export interface Recipe {
   id: string;
-  userId: string;
   title: string;
-  ingredients: { name: string; itemId: string }[];
+  ingredients: string[];
   instructions: string;
+  userId: string;
   createdAt: Date;
 }
-

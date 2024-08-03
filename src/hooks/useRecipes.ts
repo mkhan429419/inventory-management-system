@@ -4,12 +4,14 @@ import { db } from "@/config/firebaseConfig";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useUser } from "@clerk/nextjs";
 import { Recipe } from "@/types";
+import { useDeleteRecipeMutation } from "@/app/state/api";
 
 export const useRecipes = () => {
   const { user, isLoaded } = useUser();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [deleteRecipe] = useDeleteRecipeMutation();
 
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -41,5 +43,6 @@ export const useRecipes = () => {
     recipes,
     isLoading,
     isError,
+    deleteRecipe,
   };
 };
