@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
+  baseQuery: fetchBaseQuery({ baseUrl: "https://stocksmart.vercel.app" }),
   reducerPath: "api",
   tagTypes: ["PantryItems", "Products", "Recipes"],
   endpoints: (builder) => ({
