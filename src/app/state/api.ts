@@ -3,8 +3,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["PantryItems"],
+  tagTypes: ["PantryItems", "Recipes"],
   endpoints: (builder) => ({
+    // Pantry Items Endpoints
     getPantryItems: builder.query({
       query: () => `api/inventory`,
       providesTags: ["PantryItems"],
@@ -32,6 +33,11 @@ export const api = createApi({
       }),
       invalidatesTags: ["PantryItems"],
     }),
+    // Recipe Endpoints
+    getRecipes: builder.query({
+      query: () => `api/recipes`,
+      providesTags: ["Recipes"],
+    }),
   }),
 });
 
@@ -39,5 +45,6 @@ export const {
   useGetPantryItemsQuery, 
   useCreatePantryItemMutation, 
   useUpdatePantryItemMutation, 
-  useDeletePantryItemMutation 
+  useDeletePantryItemMutation,
+  useGetRecipesQuery 
 } = api;

@@ -12,4 +12,13 @@ export interface PantryItem {
   createdAt: Date;
   updatedAt: Date;
 }
+// src/types.ts
+export interface Recipe {
+  id: string;
+  userId: string;
+  title: string;
+  ingredients: { name: string; itemId: string }[];
+  instructions: string;
+  createdAt: Date;
+}
 
