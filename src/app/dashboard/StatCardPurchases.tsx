@@ -34,28 +34,15 @@ type Purchase = {
   totalCost: number;
 };
 
-type Expense = {
-  id: string;
-  userId: string;
-  category: string;
-  amount: number;
-  createdAt: Timestamp;
-};
-
-const StatCard = ({ title, primaryIcon, details, dateRange }: StatCardProps) => {
+const StatCardPurchases = ({ title, primaryIcon, dateRange }: StatCardProps) => {
   const { user } = useUser();
   const [purchaseSummary, setPurchaseSummary] = useState<Purchase[]>([]);
-  const [expenseSummary, setExpenseSummary] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
       const purchaseQuery = query(
         collection(db, "purchases"),
-        where("userId", "==", user.id)
-      );
-      const expenseQuery = query(
-        collection(db, "expenses"),
         where("userId", "==", user.id)
       );
 
@@ -65,22 +52,12 @@ const StatCard = ({ title, primaryIcon, details, dateRange }: StatCardProps) => 
           ...doc.data(),
         })) as Purchase[];
         setPurchaseSummary(purchases);
+        setIsLoading(false);
       });
 
-      const unsubscribeExpense = onSnapshot(expenseQuery, (snapshot) => {
-        const expenses = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Expense[];
-        setExpenseSummary(expenses);
-      });
-
-      setIsLoading(false);
-
-      // Clean up the listeners on component unmount
+      // Clean up the listener on component unmount
       return () => {
         unsubscribePurchase();
-        unsubscribeExpense();
       };
     }
   }, [user]);
@@ -97,18 +74,11 @@ const StatCard = ({ title, primaryIcon, details, dateRange }: StatCardProps) => 
     (acc, curr) => acc + curr.totalCost,
     0
   );
-  const totalExpenses = expenseSummary.reduce((acc, curr) => acc + curr.amount, 0);
 
   const statDetails: StatDetail[] = [
     {
       title: "Total Purchases",
       amount: `$${totalPurchases.toFixed(2)}`,
-      changePercentage: 0, // Placeholder value; calculate as needed
-      IconComponent: primaryIcon.type,
-    },
-    {
-      title: "Total Expenses",
-      amount: `$${totalExpenses.toFixed(2)}`,
       changePercentage: 0, // Placeholder value; calculate as needed
       IconComponent: primaryIcon.type,
     },
@@ -166,4 +136,4 @@ const StatCard = ({ title, primaryIcon, details, dateRange }: StatCardProps) => 
   );
 };
 
-export default StatCard;
+export default StatCardPurchases;
