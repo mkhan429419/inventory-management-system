@@ -78,7 +78,7 @@ const Inventory = () => {
       {selectedItems.length > 0 && (
         <button
           onClick={handleDelete}
-          className="self-center bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full mt-4 transition duration-200 flex items-center shadow"
+          className="self-center bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded mt-4 transition duration-200 flex items-center shadow"
         >
           <Trash2 className="w-4 h-4 mr-1" />
           Delete Selected

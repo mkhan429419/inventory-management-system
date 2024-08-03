@@ -3,17 +3,16 @@ import { db } from "@/config/firebaseConfig";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useUser } from "@clerk/nextjs";
 import { PantryItem } from "@/types";
-import { GridRowId } from "@mui/x-data-grid";
-import { useUpdatePantryItemMutation, useDeletePantryItemMutation } from "@/app/state/api";
+import { useCreatePantryItemMutation } from "@/app/state/api";
 
-export const useInventory = () => {
+export const useProducts = () => {
   const { user, isLoaded } = useUser();
-  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [products, setProducts] = useState<PantryItem[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<PantryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<GridRowId[]>([]);
-  const [updatePantryItem] = useUpdatePantryItemMutation();
-  const [deletePantryItem] = useDeletePantryItemMutation();
+  const [createProduct] = useCreatePantryItemMutation();
 
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -26,7 +25,7 @@ export const useInventory = () => {
           id: doc.id,
           ...doc.data(),
         })) as PantryItem[];
-        setPantryItems(items);
+        setProducts(items);
         setIsLoading(false);
         setIsError(false);
       },
@@ -41,28 +40,31 @@ export const useInventory = () => {
     return () => unsubscribe();
   }, [isLoaded, user]);
 
-  const handleDelete = async () => {
-    for (const id of selectedItems) {
-      await deletePantryItem(id as string).unwrap();
+  useEffect(() => {
+    if (searchTerm === "") {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter((product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
     }
-    setSelectedItems([]);
+  }, [searchTerm, products]);
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
   };
 
-  const processRowUpdate = async (newRow: any) => {
-    const updatedRow = { ...newRow, isNew: false };
-    await updatePantryItem(updatedRow).unwrap();
-    return updatedRow;
+  const handleCreateProduct = async (productData: Omit<PantryItem, "id" | "userId" | "createdAt" | "updatedAt">) => {
+    await createProduct(productData);
   };
 
   return {
-    user,
-    isLoaded,
-    pantryItems,
+    products: filteredProducts,
     isLoading,
     isError,
-    selectedItems,
-    setSelectedItems,
-    handleDelete,
-    processRowUpdate,
+    handleSearch,
+    handleCreateProduct,
+    searchTerm,
   };
 };

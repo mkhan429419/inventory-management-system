@@ -9,6 +9,7 @@ export interface PantryItem {
   rating: number;
   quantity: number;
   imageUrl: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Date;
+  updatedAt: Date;
 }
+

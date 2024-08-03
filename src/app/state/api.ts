@@ -6,13 +6,21 @@ export const api = createApi({
   tagTypes: ["PantryItems"],
   endpoints: (builder) => ({
     getPantryItems: builder.query({
-      query: () => "api/inventory",
+      query: () => `api/inventory`,
       providesTags: ["PantryItems"],
+    }),
+    createPantryItem: builder.mutation({
+      query: (newItem) => ({
+        url: `api/inventory`,
+        method: "POST",
+        body: newItem,
+      }),
+      invalidatesTags: ["PantryItems"],
     }),
     updatePantryItem: builder.mutation({
       query: ({ id, ...patch }) => ({
         url: `api/inventory/${id}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: patch,
       }),
       invalidatesTags: ["PantryItems"],
@@ -20,11 +28,16 @@ export const api = createApi({
     deletePantryItem: builder.mutation({
       query: (id) => ({
         url: `api/inventory/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       invalidatesTags: ["PantryItems"],
     }),
   }),
 });
 
-export const { useGetPantryItemsQuery, useUpdatePantryItemMutation, useDeletePantryItemMutation } = api;
+export const { 
+  useGetPantryItemsQuery, 
+  useCreatePantryItemMutation, 
+  useUpdatePantryItemMutation, 
+  useDeletePantryItemMutation 
+} = api;
