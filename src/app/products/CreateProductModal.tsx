@@ -81,7 +81,7 @@ const CreateProductModal = ({ isOpen, onClose, onCreate }: CreateProductModalPro
         fileData
       );
       const imageUrl = uploadResponse.data.secure_url;
-
+      // redeploy
       // Create product with imageUrl
       const productData = {
         ...formData,
