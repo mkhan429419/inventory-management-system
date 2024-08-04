@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/config/firebaseConfig";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { auth } from "@clerk/nextjs/server";
 import { PantryItem } from "@/types";
 
@@ -56,9 +56,41 @@ export async function POST(request: Request) {
       updatedAt: new Date(),
     };
 
-    await addDoc(collection(db, "pantryItems"), newPantryItem);
+    const pantryItemRef = await addDoc(collection(db, "pantryItems"), newPantryItem);
 
-    return NextResponse.json({ message: "Pantry item added successfully" });
+    const newPurchase = {
+      userId,
+      pantryItemId: pantryItemRef.id,
+      createdAt: Timestamp.now(),
+      quantity,
+      unitCost: price,
+      totalCost: price * quantity,
+    };
+
+    await addDoc(collection(db, "purchases"), newPurchase);
+
+    // Determine the category based on the total cost
+    const totalCost = price * quantity;
+    let category = "Basic Necessities";
+    if (totalCost > 150) {
+      category = "Premium Purchases";
+    } else if (totalCost > 50) {
+      category = "Monthly Bulk Purchase";
+    } else if (totalCost > 10) {
+      category = "Weekly Stock-up";
+    }
+
+    // Create an expense for the new purchase
+    const newExpense = {
+      userId,
+      category,
+      amount: totalCost,
+      createdAt: Timestamp.now(),
+    };
+
+    await addDoc(collection(db, "expenses"), newExpense);
+
+    return NextResponse.json({ message: "Pantry item, purchase, and expense added successfully" });
   } catch (error) {
     console.error("Error adding pantry item:", error);
     return NextResponse.json({ message: "Error adding pantry item" }, { status: 500 });

@@ -123,12 +123,6 @@ const Sidebar = () => {
           isCollapsed={isSidebarCollapsed}
         />
         <SidebarLink
-          href="/expenses"
-          icon={CircleDollarSign}
-          label="Expenses"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
           href="/logout"
           icon={LogOut}
           label="Logout"

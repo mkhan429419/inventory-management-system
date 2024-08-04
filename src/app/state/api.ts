@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: "https://stocksmart.vercel.app" }),
+  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["PantryItems", "Products", "Recipes"],
+  tagTypes: ["PantryItems", "Products", "Recipes", "Purchases", "Expenses"],
   endpoints: (builder) => ({
     // Pantry Items Endpoints
     getPantryItems: builder.query({
@@ -61,6 +61,18 @@ export const api = createApi({
       }),
       invalidatesTags: ["Products"],
     }),
+    // Purchase Endpoints
+    getPurchases: builder.query({
+      query: () => `api/purchases`,
+      providesTags: ["Purchases"],
+    }),
+    createExpense: builder.mutation({
+      query: () => ({
+        url: `api/expenses`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Expenses"],
+    }),
     // Recipe Endpoints
     getRecipes: builder.query({
       query: () => `api/recipes`,
@@ -93,6 +105,8 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useGetPurchasesQuery,
+  useCreateExpenseMutation,
   useGetRecipesQuery,
   useCreateRecipeMutation,
   useDeleteRecipeMutation,

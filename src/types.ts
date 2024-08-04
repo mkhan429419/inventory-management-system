@@ -21,3 +21,21 @@ export interface Recipe {
   userId: string;
   createdAt: Date;
 }
+
+export type Purchase = {
+  id: string;
+  userId: string;
+  pantryItemId: string;
+  createdAt: Date;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+};
+
+export type Expense = {
+  id: string;
+  userId: string;
+  category: string;
+  amount: number;
+  createdAt: Date;
+};
