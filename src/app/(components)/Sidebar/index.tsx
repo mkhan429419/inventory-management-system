@@ -3,29 +3,26 @@ import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsSidebarCollapsed } from "@/app/state";
 import {
   Archive,
-  CircleDollarSign,
-  Clipboard,
-  Icon,
   Layout,
   LogOut,
   LucideIcon,
-  LucideProps,
   Menu,
   Notebook,
-  NotebookPen,
-  ShoppingBasket,
   ShoppingCart,
-  SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
+import { useAuth } from "@clerk/nextjs"; // Import Clerk hook
+import Image from 'next/image';
+import logo from './st.png'; // Import the image
 
 interface SidebarLinkProps {
   href: string;
   icon: LucideIcon;
   label: string;
   isCollapsed: boolean;
+  onClick?: () => void; // Optional onClick prop
 }
 
 const SidebarLink = ({
@@ -33,6 +30,7 @@ const SidebarLink = ({
   icon: Icon,
   label,
   isCollapsed,
+  onClick,
 }: SidebarLinkProps) => {
   const pathname = usePathname();
   const isActive =
@@ -40,6 +38,7 @@ const SidebarLink = ({
   return (
     <Link href={href}>
       <div
+        onClick={onClick} // Add onClick handler
         className={`cursor-pointer flex items-center ${
           isCollapsed ? "justify-center py-4" : "justify-start px-8 py-4"
         } hover:text-blue-500 hover:bg-blue-100 gap-3 transition-colors ${
@@ -70,6 +69,9 @@ const Sidebar = () => {
   const sidebarClassNames = `fixed flex flex-col ${
     isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64"
   } bg-white transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
+  
+  const { signOut } = useAuth(); // Use Clerk signOut
+
   return (
     <div className={sidebarClassNames}>
       {/* top logo */}
@@ -78,13 +80,13 @@ const Sidebar = () => {
           isSidebarCollapsed ? "px-5" : "px-8"
         }`}
       >
-        <div>loho</div>
+        <Image src={logo} alt="logo" width={40} height={40} />
         <h1
           className={`${
             isSidebarCollapsed ? "hidden" : "block"
           } font-extrabold text-2xl`}
         >
-          maheenstock
+          StockSmart
         </h1>
 
         <button
@@ -123,10 +125,11 @@ const Sidebar = () => {
           isCollapsed={isSidebarCollapsed}
         />
         <SidebarLink
-          href="/logout"
+          href="#"
           icon={LogOut}
           label="Logout"
           isCollapsed={isSidebarCollapsed}
+          onClick={() => signOut()} // Add signOut to onClick
         />
       </div>
       {/* footer */}
