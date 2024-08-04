@@ -4,6 +4,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useUser } from "@clerk/nextjs";
 import { PantryItem } from "@/types";
 import { useCreateProductMutation } from "@/app/state/api";
+import axios from 'axios';
 
 export const useProducts = () => {
   const { user, isLoaded } = useUser();
