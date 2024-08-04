@@ -90,9 +90,9 @@ const CreateProductModal = ({ isOpen, onClose, onCreate }: CreateProductModalPro
 
       onCreate(productData);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading file:", error);
-      alert("Error uploading file. Please try again.");
+      alert(`Error uploading file: ${error.message}\n\nDetails: ${JSON.stringify(error.response?.data)}`);
     } finally {
       setIsUploading(false);
     }
