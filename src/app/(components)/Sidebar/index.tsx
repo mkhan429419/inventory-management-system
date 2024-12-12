@@ -14,8 +14,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useAuth } from "@clerk/nextjs"; // Import Clerk hook
-import Image from 'next/image';
-import logo from './st.png'; // Import the image
+import Image from "next/image";
+import logo from "./st.png"; // Import the image
 
 interface SidebarLinkProps {
   href: string;
@@ -69,7 +69,7 @@ const Sidebar = () => {
   const sidebarClassNames = `fixed flex flex-col ${
     isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64"
   } bg-white transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
-  
+
   const { signOut } = useAuth(); // Use Clerk signOut
 
   return (
